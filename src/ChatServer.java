@@ -41,9 +41,6 @@ public class ChatServer extends Thread {
 			try {	
 			
 				Socket new_client = server_socket.accept();
-				// don't have the extra computers/VMs to test this properly
-				// but this should show whether or not they've managed to connect to the server
-				// System.out.println(new_client.getRemoteSocketAddress() + "has just connected!");
 				System.out.println(new_client.getRemoteSocketAddress() + " has connected to the server!");	
 				test_mappings.add(new_client);	
 				clients_connected++;	
