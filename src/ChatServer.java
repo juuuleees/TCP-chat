@@ -19,7 +19,8 @@ public class ChatServer extends Thread {
 	// this next line is for testing
 	private ArrayList<Socket> socket_connections = new ArrayList<Socket>();
 	// private String[] names;
-	private HashMap<SocketAddress, String> connection_info = new HashMap<SocketAddress, String>();
+	// private HashMap<SocketAddress, String> connection_info = new HashMap<SocketAddress, String>();
+	private ArrayList<ClientStream> client_streams = new ArrayList<ClientStream>();
 	private String[] all_messages;
 	private int total_clients;
 
@@ -55,13 +56,20 @@ public class ChatServer extends Thread {
 				DataInputStream incoming = new DataInputStream(new_client.getInputStream());
 				String client_name = incoming.readUTF();
 				System.out.println(client_name + " has connected to the server!");	
+				ClientStream fresh_stream = new ClientStream(client_name, new_client.getRemoteSocketAddress(),
+															   incoming, new_client.getOutputStream());
 
-				socket_connections.add(new_client);	
-				connection_info.put(new_client.getRemoteSocketAddress(), client_name);
+
+				socket_connections.add(new_client);
+				client_streams.add(fresh_stream);	
+				// connection_info.put(new_client.getRemoteSocketAddress(), client_name);
 
 				if (socket_connections.size() == total_clients) {
 					System.out.println("Chat room full!");
-					System.out.println(connection_info);
+					// System.out.println(connection_info);
+					// for (int i = 0; i < client_streams.size(); i++) {
+					// 	System.out.println(client_streams.get(i).get_remote_addr());
+					// }
 					is_room_full = true;
 				}
 			
