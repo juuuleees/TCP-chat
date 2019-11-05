@@ -1,7 +1,15 @@
-import java.net.*;
-import java.io.*;
+// import java.net.*;
+// import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.ServerSocket;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -9,10 +17,11 @@ public class ChatServer extends Thread {
 	
 	private ServerSocket server_socket;
 	// this next line is for testing
-	private ArrayList<Socket> test_mappings = new ArrayList<Socket>();
-	// private HashMap<SocketAddress, String> client_mappings;
+	private ArrayList<Socket> socket_connections = new ArrayList<Socket>();
+	// private String[] names;
+	private HashMap<SocketAddress, String> connection_info = new HashMap<SocketAddress, String>();
+	private String[] all_messages;
 	private int total_clients;
-	private int clients_connected = 0;
 
 	public ChatServer(int port, int clients) {
 		try {
@@ -36,17 +45,23 @@ public class ChatServer extends Thread {
 		System.out.println("Client list not yet full, waiting for further connections...");
 		System.out.println("Waiting for clients on port " + server_socket.getLocalPort() + "...");	
 
+		//  keep accepting connections as long as the room isn't full
 		while (is_room_full != true) {
 			
 			try {	
 			
 				Socket new_client = server_socket.accept();
-				System.out.println(new_client.getRemoteSocketAddress() + " has connected to the server!");	
-				test_mappings.add(new_client);	
-				clients_connected++;	
 
-				if (clients_connected == test_mappings.size()) {
+				DataInputStream incoming = new DataInputStream(new_client.getInputStream());
+				String client_name = incoming.readUTF();
+				System.out.println(client_name + " has connected to the server!");	
+
+				socket_connections.add(new_client);	
+				connection_info.put(new_client.getRemoteSocketAddress(), client_name);
+
+				if (socket_connections.size() == total_clients) {
 					System.out.println("Chat room full!");
+					System.out.println(connection_info);
 					is_room_full = true;
 				}
 			
@@ -57,72 +72,11 @@ public class ChatServer extends Thread {
 
 		}
 
+		// pass the messages to each client as they come
 		// while (connected) {
 
-		// 	// System.out.println(is_room_full);
-		// 	// allow clients to connect to the server until full
-		// 	if (is_room_full == false) {
-		// 		System.out.println("Client list not yet full, waiting for further connections...");
-		// 	// 	System.out.println("Waiting for clients on port " + server_socket.getLocalPort() + "...");
-	
-		// 		// try {
-	
-		// 		// 	Socket new_client = server_socket.accept();
-		// 		// 	// don't have the extra computers/VMs to test this properly
-		// 		// 	// but this should show whether or not they've managed to connect to the server
-		// 		// 	// System.out.println(new_client.getRemoteSocketAddress() + "has just connected!");
-		// 		// 	System.out.println(new_client.getRemoteSocketAddress() + " has connected to the server!");
-	
-		// 		// 	test_mappings.add(new_client);
-	
-		// 		// 	clients_connected++;
-	
-		// 		// } catch (Exception e) {
-		// 		// 	System.out.println("Error: " + e);
-		// 		// 	break;
-		// 		// }
-		// 	}
-
-		// 	// while (is_room_full) {
-		// 	// 	System.out.println("Client list not yet full, waiting for further connections...");
-		// 	// 	System.out.println("Waiting for clients on port " + server_socket.getLocalPort() + "...");
-	
-		// 	// 	try {
-	
-		// 	// 		Socket new_client = server_socket.accept();
-		// 	// 		// don't have the extra computers/VMs to test this properly
-		// 	// 		// but this should show whether or not they've managed to connect to the server
-		// 	// 		// System.out.println(new_client.getRemoteSocketAddress() + "has just connected!");
-		// 	// 		System.out.println(new_client.getRemoteSocketAddress() + " has connected to the server!");
-	
-		// 	// 		test_mappings.add(new_client);
-	
-		// 	// 		clients_connected++;
-	
-		// 	// 	} catch (Exception e) {
-		// 	// 		System.out.println("Error: " + e);
-		// 	// 		break;
-		// 	// 	}
-	
-		// 	// }
-
 		// }
-
-		// while (connected) {
-
-			
-				
-			
-
-		// }
-
-
-
-		/*
-			Tinatry kong i-incorporate dito yung ginawa sa CircleWars
-			na anim yung pwedeng mag-connect sa server bago magsara yung connection.
-			Am having trouble atm kasi di ko makita kung pano inimplement ni Sir Jach.
-		*/	
+	
 	}
 
 	public static void main(String args[]) {
@@ -135,7 +89,7 @@ public class ChatServer extends Thread {
 			main_chat.start();
 
 		} catch (Exception e) {
-			System.out.println("Error: " + e);
+			System.out.println("Server timed out. Goodbye.");
 		}
 	}
 
