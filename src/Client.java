@@ -4,7 +4,10 @@ import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.OutputStream;
 import java.io.InputStream;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+// import java.util.Scanner;
 
 public class Client {
 	
@@ -34,7 +37,7 @@ public class Client {
 		String name = args[0];
 		String addr = args[1];
 		int port = Integer.parseInt(args[2]);
-		Scanner text_in = new Scanner(System.in);
+		// Scanner text_in = new Scanner(System.in);
 		boolean connected_to_server;
 
 		try {
@@ -49,6 +52,7 @@ public class Client {
 
 			InputStream come_from_server = server.getInputStream();
 			DataInputStream incoming = new DataInputStream(come_from_server);
+			BufferedReader from_server = new BufferedReader(new InputStreamReader(come_from_server));
 			connected_to_server = true;
 
 			// send username to server
@@ -56,31 +60,41 @@ public class Client {
 
 			// send/receive chat messages
 			while (connected_to_server) {
-				// System.out.print("> ");
-				// String msg_text = text_in.next();
 				
-				// if (msg_text.equals("bye")) {
-				// 	System.out.println("Leaving chat...");
-				// 	server.close();
-				// 	connected_to_server = false;
-				// } else {
-				// 	outgoing.writeUTF(msg_text);
-				// }
-				System.out.println("incoming.available() = " + incoming.available());
 				if (incoming.available() != 0) {
-					System.out.println(incoming.readUTF());
+					System.out.println(from_server.readLine());
 				} else { 
 					System.out.print("> ");
-					String msg_text = text_in.next();
-					
-					if (msg_text.equals("bye")) {
-						System.out.println("Leaving chat...");
-						server.close();
-						connected_to_server = false;
-					} else {
-						outgoing.writeUTF(msg_text);
+					try {
+						BufferedReader text_reader = new BufferedReader(new InputStreamReader(System.in));
+						String out_text = text_reader.readLine();
+
+						if (out_text.equals("bye")) {
+							System.out.println("Leaving chat...");
+							server.close();
+							connected_to_server = false;
+						} else {
+							PrintWriter writer = new PrintWriter(send_to_server, true);
+							writer.println(out_text);
+						}
+
+					} catch (Exception e) {
+						System.out.println("Error: " + e);
 					}
+
 				}
+
+				// thread implementation
+				// try {
+				// 	BufferedReader text_reader = new BufferedReader(new InputStreamReader(System.in));
+
+				// 	new GetMessage(text_reader, incoming).start();
+				// 	new SendMessage(send_to_server);
+
+				// } catch (Exception e) {
+				// 	System.out.println("Error: " + e);
+				// }
+
 			}
 
 

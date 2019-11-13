@@ -8,6 +8,9 @@ import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,6 +19,7 @@ import java.util.Random;
 public class ChatServer extends Thread {
 	
 	private ServerSocket server_socket;
+	private PrintWriter outgoing;
 	// this next line is for testing
 	private ArrayList<Socket> socket_connections = new ArrayList<Socket>();
 	// private String[] names;
@@ -81,9 +85,36 @@ public class ChatServer extends Thread {
 		}
 
 		// pass the messages to each client as they come
-		// while (connected) {
+		while (connected) {
+			// System.out.println("hai");
+			for (int i = 0; i < socket_connections.size(); i++) {
+				// System.out.println(client_streams.get(i).get_remote_addr());
+				try {
+					DataInputStream current_socket = new DataInputStream(socket_connections.get(i).getInputStream());
+					if (current_socket.available() != 0) {
+						
+						BufferedReader incoming = new BufferedReader(new InputStreamReader(socket_connections.get(i).getInputStream()));
+						// DataOutputStream outgoing = new DataOutputStream(socket_connections.get(i).getOutputStream());
+						// outgoing = new PrintWriter(socket_connections.get(i).getOutputStream(), true);
+	
+						String client_text = incoming.readLine();
+						System.out.println(client_text);
+						
+						for (int j = 0; j < socket_connections.size(); j++) {
+							if (j != i) {
+								outgoing = new PrintWriter(socket_connections.get(j).getOutputStream(), true);
+								outgoing.println(client_text);
+							}
+						}
+	
+					}
+				} catch (Exception e) {
+					System.out.println("Error: " + e);
+				}
 
-		// }
+			}
+
+		}
 	
 	}
 
