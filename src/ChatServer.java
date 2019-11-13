@@ -24,9 +24,9 @@ public class ChatServer extends Thread {
 	private String[] all_messages;
 	private int total_clients;
 
-	public ChatServer(int port, int clients) {
+	public ChatServer(int addr_port, int clients) {
 		try {
-			server_socket = new ServerSocket(port);
+			server_socket = new ServerSocket(addr_port);
 			this.total_clients = clients; 
 			server_socket.setSoTimeout(10000);
 			System.out.println("Server up!");

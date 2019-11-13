@@ -56,17 +56,31 @@ public class Client {
 
 			// send/receive chat messages
 			while (connected_to_server) {
-				System.out.print("> ");
-				String msg_text = text_in.next();
+				// System.out.print("> ");
+				// String msg_text = text_in.next();
 				
-				if (msg_text.equals("bye")) {
-					System.out.println("Leaving chat...");
-					server.close();
-					connected_to_server = false;
-				} else {
-					outgoing.writeUTF(msg_text);
+				// if (msg_text.equals("bye")) {
+				// 	System.out.println("Leaving chat...");
+				// 	server.close();
+				// 	connected_to_server = false;
+				// } else {
+				// 	outgoing.writeUTF(msg_text);
+				// }
+				System.out.println("incoming.available() = " + incoming.available());
+				if (incoming.available() != 0) {
+					System.out.println(incoming.readUTF());
+				} else { 
+					System.out.print("> ");
+					String msg_text = text_in.next();
+					
+					if (msg_text.equals("bye")) {
+						System.out.println("Leaving chat...");
+						server.close();
+						connected_to_server = false;
+					} else {
+						outgoing.writeUTF(msg_text);
+					}
 				}
-
 			}
 
 
